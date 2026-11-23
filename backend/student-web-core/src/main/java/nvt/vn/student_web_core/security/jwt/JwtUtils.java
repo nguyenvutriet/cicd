@@ -34,6 +34,12 @@ public class JwtUtils {
     @Value("${spring.app.jwtCookieName}")
     private String jwtCookie;
 
+    @Value("${spring.app.cookie-secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${spring.app.cookie-same-site:Lax}")
+    private String cookieSameSite;
+
     public String getJwtFromCookies(HttpServletRequest request){
         Cookie cookie = WebUtils.getCookie(request, jwtCookie);
         if(cookie != null){
@@ -49,8 +55,8 @@ public class JwtUtils {
                 .path("/api")
                 .maxAge(jwtExpirationMs / 1000)
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
                 .build();
         return cookie;
     }
@@ -60,6 +66,8 @@ public class JwtUtils {
                 .path("/api")
                 .maxAge(0)
                 .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
                 .build();
         return cookie;
     }
