@@ -25,4 +25,4 @@ COPY --from=build target/student-web-core-0.0.1-SNAPSHOT.jar .
 EXPOSE 8080
 
 # Set the entry point to run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "sb-ecom-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "student-web-core-0.0.1-SNAPSHOT.jar"]
