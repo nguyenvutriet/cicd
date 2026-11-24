@@ -19,7 +19,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Copy the built JAR file from the build stage
-COPY --from=build target/student-web-core-0.0.1-SNAPSHOT.jar .
+COPY --from=build /app/target/student-web-core-0.0.1-SNAPSHOT.jar .
 
 # Expose the application port
 EXPOSE 8080
