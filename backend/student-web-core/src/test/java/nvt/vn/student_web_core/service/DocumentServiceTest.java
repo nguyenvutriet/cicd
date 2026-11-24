@@ -41,6 +41,9 @@ class DocumentServiceTest {
     @Mock
     private CloudinaryService cloudinaryService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private DocumentService documentService;
 
@@ -64,6 +67,8 @@ class DocumentServiceTest {
         staff.setDepartment(deptIT);
 
         lenient().when(authUtil.loggedInUser()).thenReturn(staff);
+        assertNotNull(org.springframework.test.util.ReflectionTestUtils
+                .getField(documentService, "notificationService"));
     }
 
     @Test
