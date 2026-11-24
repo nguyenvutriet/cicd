@@ -1,22 +1,28 @@
-# ---------- Build stage ----------
+# Use an official Maven image to build the Spring Boot application
 FROM maven:3.9.9-eclipse-temurin-21 AS build
+
+# Set the working directory
 WORKDIR /app
 
-# Cache dependency (chỉ chạy lại khi pom.xml đổi)
+# Copy the pom.xml and install dependencies
 COPY pom.xml .
-RUN mvn -B -q -Dmaven.wagon.http.retryHandler.count=5 dependency:go-offline
+RUN mvn dependency:go-offline
 
+#  Copy the source code and build the application
 COPY src ./src
-RUN mvn -B -q -DskipTests package
+RUN mvn package -DskipTests
 
-# ---------- Run stage ----------
+# Use an official OpenJDK image to run the Spring Boot application
 FROM eclipse-temurin:21-jre
+
+# Set the working directory
 WORKDIR /app
 
-# Chạy bằng user thường, không dùng root
-RUN useradd -r -u 1001 appuser
-COPY --from=build /app/target/*.jar app.jar
-USER appuser
+# Copy the built JAR file from the build stage
+COPY --from=build target/student-web-core-0.0.1-SNAPSHOT.jar .
 
+# Expose the application port
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
+
+# Set the entry point to run the Spring Boot application
+ENTRYPOINT ["java", "-jar", "sb-ecom-0.0.1-SNAPSHOT.jar"]
