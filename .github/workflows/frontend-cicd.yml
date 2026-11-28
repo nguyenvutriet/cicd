@@ -1,0 +1,54 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-cicd.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-cicd.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/student-web
+    env:
+      VITE_BACK_END_URL: ${{ vars.VITE_BACK_END_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/student-web/package-lock.json
+
+      - name: Check required variable
+        run: test -n "$VITE_BACK_END_URL" || { echo "Chua khai bao bien VITE_BACK_END_URL"; exit 1; }
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Deploy to Netlify (production)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: >-
+          npx --yes netlify-cli@latest deploy --prod --no-build --dir=dist
+          --site "$NETLIFY_SITE_ID" --message "GitHub Actions $GITHUB_SHA"
